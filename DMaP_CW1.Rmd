@@ -1,0 +1,39 @@
+---
+title: "CW1"
+output: html_document
+---
+#Assessment Brief Template – May 2025
+#d. Keep the samples that have waterfront, view, and yr_renovated values <= 0:
+#e. Remove the following features: ``id", ``date”, ``waterfront", ``view",
+#``yr_renovated", and ``zipcode".
+#f. Consider the price column as the target (y) and all other columns as features
+#(X). Randomly shuffle the data, split it into two equal folds (almost), and
+#rename them as train and test sets. 
+
+#a. Load the dataset into a data frame
+
+houseData = read.csv("house_sales(in).csv", header = TRUE)
+
+#b. Report the total number of rows and columns of the data frame.
+
+print('Number of columns: ')
+print(ncol(houseData))
+print('Number of rows: ')
+print(nrow(houseData))
+
+#c. List the column names
+
+names(houseData)
+
+#d. Keep the samples that have waterfront, view, and yr_renovated values <= 0
+
+houseData <- houseData[houseData$waterfront <= 0, ]
+houseData <- houseData[houseData$view <= 0, ]
+houseData <- houseData[houseData$yr_renovated <= 0, ]
+
+#e. Remove the following features: ``id", ``date”, ``waterfront", ``view",
+
+drop <- c("id", "date", "waterfront", "view", "yr_renovated", "zipcode")
+
+houseData = houseData[,!(names(houseData) %in% drop)]
+
