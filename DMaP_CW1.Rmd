@@ -2,13 +2,9 @@
 title: "CW1"
 output: html_document
 ---
-#Assessment Brief Template – May 2025
-#d. Keep the samples that have waterfront, view, and yr_renovated values <= 0:
-#e. Remove the following features: ``id", ``date”, ``waterfront", ``view",
-#``yr_renovated", and ``zipcode".
-#f. Consider the price column as the target (y) and all other columns as features
-#(X). Randomly shuffle the data, split it into two equal folds (almost), and
-#rename them as train and test sets. 
+# Coursework 1
+# Part 2
+# Task 1
 
 #a. Load the dataset into a data frame
 
@@ -35,5 +31,99 @@ houseData <- houseData[houseData$yr_renovated <= 0, ]
 
 drop <- c("id", "date", "waterfront", "view", "yr_renovated", "zipcode")
 
-houseData = houseData[,!(names(houseData) %in% drop)]
+houseData <- houseData[,!(names(houseData) %in% drop)]
+
+
+#f. Consider the price column as the target (y) and all other columns as features
+#(X). Randomly shuffle the data, split it into two equal folds (almost), and
+#rename them as train and test sets. 
+
+#Shuffle the data randomly
+set.seed(42) # For reproducibility
+shuffled_houseData <- houseData[sample(nrow(houseData)), ]
+
+#Find the midpoint split index
+midpoint <- floor(nrow(shuffled_houseData) / 2)
+
+#Split into equal train and test folds
+train_set <- shuffled_houseData[1:midpoint, ]
+test_set  <- shuffled_houseData[(midpoint + 1):nrow(shuffled_houseData), ]
+
+#Separate features (X) and target (y)
+X_train <- train_set[, !names(train_set) %in% "price"]
+Y_train <- train_set$price
+
+X_test  <- test_set[, !names(test_set) %in% "price"]
+Y_test  <- test_set$price
+
+
+# Task 2
+
+#a. Select the statistically significant (alpha < 0.0001) features having the Spearman correlation coefficient (>= 0.30) with the price from the train set.
+
+
+#Identify numeric feature columns
+all_cols_train <- names(X_train)[sapply(X_train, is.numeric)]
+target_cols_train <- setdiff(all_cols_train, "price")
+
+#Test each column against price
+ss_features_train <- c()
+
+for (col in target_cols_train) {
+  test_res <- suppressWarnings(
+    cor.test(X_train[[col]], Y_train, method = "spearman", exact = FALSE)
+  )
+
+  rho <- test_res$estimate
+  p_val <- test_res$p.value
+
+  if (!is.na(p_val) && abs(rho) >= 0.30 && p_val < 0.0001) {
+    ss_features_train <- c(ss_features_train, col)
+  }
+}
+
+print(ss_features_train)
+
+X_train <- X_train[, names(X_train) %in% ss_features_train, drop = FALSE]
+
+#b. Choose the same set of features selected in 2 (a) from the test set.
+
+all_cols_test <- names(X_test)[sapply(X_test, is.numeric)]
+target_cols_test <- setdiff(all_cols_test, "price")
+
+#Test each column against price
+ss_features_test <- c()
+
+for (col in target_cols_test) {
+  test_res <- suppressWarnings(
+    cor.test(X_test[[col]], Y_test, method = "spearman", exact = FALSE)
+  )
+
+  rho <- test_res$estimate
+  p_val <- test_res$p.value
+
+  if (!is.na(p_val) && abs(rho) >= 0.30 && p_val < 0.0001) {
+    ss_features_test <- c(ss_features_test, col)
+  }
+}
+
+print(ss_features_test)
+
+
+X_test <- X_test[, names(X_test) %in% ss_features_test, drop = FALSE]
+
+#c. Report the number of rows and columns of the train and test sets after steps 2 (a) and 2(b).
+
+print('Number of columns: ')
+print(ncol(X_train))
+print('Number of rows: ')
+print(nrow(X_train))
+
+print('Number of columns: ')
+print(ncol(X_test))
+print('Number of rows: ')
+print(nrow(X_test))
+
+
+
 
